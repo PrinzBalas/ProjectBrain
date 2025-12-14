@@ -14,7 +14,7 @@ import uuid
 
 class NeuralNetwork:
     """Simple neural network implementation in Python"""
-    
+
     def __init__(self, layers, network_id=None):
         self.id = network_id or str(uuid.uuid4())
         self.layers = layers
@@ -28,7 +28,7 @@ class NeuralNetwork:
             b = np.zeros((1, layers[i + 1]))
             self.weights.append(w)
             self.biases.append(b)
-    
+
     def relu(self, x):
         """ReLU activation function"""
         return np.maximum(0, x)
@@ -39,18 +39,26 @@ class NeuralNetwork:
     
     def forward(self, inputs):
         """Forward propagation"""
-        activation = np.array(inputs).reshape(1, -1)
+        self.biases[0] = np.array(inputs).reshape(1, -1)
         
-        for i in range(len(self.weights)):
-            z = np.dot(activation, self.weights[i]) + self.biases[i]
+        for i in range(1, len(self.biases[0])):
+            for j in range(len(self.biases[i])):
+                value = 0.0
+                for k in range(len(self.biases[i-1])):
+                    value += self.weights[i-1][j][k] * self.biases[i-1][k]
+                self.biases[i][j] = self.tanh(value)
+        return self.biases[-1]
+
+        # for i in range(len(self.weights)):
+        #     z = np.dot(activation, self.weights[i]) + self.biases[i]
             
-            # Use ReLU for hidden layers, tanh for output
-            if i < len(self.weights) - 1:
-                activation = self.relu(z)
-            else:
-                activation = self.tanh(z)
+        #     # Use ReLU for hidden layers, tanh for output
+        #     if i < len(self.weights) - 1:
+        #         activation = self.relu(z)
+        #     else:
+        #         activation = self.tanh(z)
         
-        return activation.flatten().tolist()
+        # return activation.flatten().tolist()
     
     def mutate(self, mutation_rate=0.1, mutation_strength=0.2):
         """
